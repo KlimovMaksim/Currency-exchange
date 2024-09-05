@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: CurrencyExchange
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:15432/currency-exchange-db
+    username: java
+    password: java
+
+  jpa:
+    show-sql: true
