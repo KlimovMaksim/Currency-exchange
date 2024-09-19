@@ -2,48 +2,36 @@ package ru.klimov.currencyexchange.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.klimov.currencyexchange.entity.Currency;
-import ru.klimov.currencyexchange.repository.JdbcCurrencyRepository;
+import ru.klimov.currencyexchange.service.CurrencyService;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/currencies", produces = "application/json")
 public class CurrencyController {
 
-    private final JdbcCurrencyRepository currencyRepository;
+    private final CurrencyService currencyService;
 
     @Autowired
-    public CurrencyController(JdbcCurrencyRepository currencyRepository) {
-        this.currencyRepository = currencyRepository;
+    public CurrencyController(CurrencyService currencyService) {
+        this.currencyService = currencyService;
     }
 
     @GetMapping
     public Iterable<Currency> getCurrencies() {
-        return currencyRepository.findAll();
+        return currencyService.findAllCurrencies();
     }
 
-    @GetMapping("/{code}")
-    public ResponseEntity<Currency> getCurrency(@PathVariable String code){
-        Optional<Currency> result = currencyRepository.findByCurrencyCode(code);
-        if(result.isPresent()){
-            return new ResponseEntity<>(result.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+    @GetMapping("/{currencyCode}")
+    public Currency getCurrency(@PathVariable String currencyCode){
+        return currencyService.getCurrency(currencyCode);
     }
 
     @PostMapping(consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
     public Currency createCurrency(@RequestParam Map<String,String> currencyParamMap){
-        Currency currency = new Currency();
-        currency.setCode(currencyParamMap.get("code"));
-        currency.setFullName(currencyParamMap.get("fullname"));
-        currency.setSign(currencyParamMap.get("sign"));
-        currencyRepository.save(currency);
-        return currency;
+        return currencyService.createCurrency(currencyParamMap);
     }
 }
