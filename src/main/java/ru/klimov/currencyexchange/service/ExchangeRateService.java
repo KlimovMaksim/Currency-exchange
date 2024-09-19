@@ -31,8 +31,18 @@ public class ExchangeRateService {
 
     public ExchangeRate getExchangeRateByCodePair(String codePair) {
         if (codePair.isBlank()) throw new IllegalArgumentException("Exchange rate code pair must not be empty");
-        return exchangeRateRepository.findExchangeRateByCodePair(codePair.substring(0, 3), codePair.substring(3))
-                .orElseThrow(() -> new ExchangeRateNotFoundException("Exchange rate with " + codePair + "not found"));
+        return findExchangeRate(codePair.substring(0, 3), codePair.substring(3));
+    }
+
+    private ExchangeRate findExchangeRate(String from, String to) {
+        return exchangeRateRepository.findExchangeRateByCodePair(from, to)
+                .orElseThrow(() -> new ExchangeRateNotFoundException("Exchange rate with " + from + "->" + to + " not found"));
+    }
+
+    public ExchangeRate getExchangeRateByCodePair(String from, String to) {
+        if (from.isBlank() || to.isBlank())
+            throw new IllegalArgumentException("Exchange rate code pair must not be empty");
+        return findExchangeRate(from, to);
     }
 
     public ExchangeRate createExchangeRate(Map<String, String> exchangeRateParamMap) {
