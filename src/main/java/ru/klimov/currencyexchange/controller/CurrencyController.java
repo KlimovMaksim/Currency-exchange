@@ -48,19 +48,19 @@ public class CurrencyController {
     }
 
     @ExceptionHandler(InvalidCurrencyDataException.class)
-    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(InvalidCurrencyDataException ex) {
+    public ResponseEntity<ProblemDetail> handleInvalidCurrencyDataException(InvalidCurrencyDataException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
 
     @ExceptionHandler(CurrencyAlreadyExistException.class)
-    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(CurrencyAlreadyExistException ex) {
+    public ResponseEntity<ProblemDetail> handleCurrencyAlreadyExistException(CurrencyAlreadyExistException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage()));
     }
 
     @ExceptionHandler(CannotGetJdbcConnectionException.class)
-    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(CannotGetJdbcConnectionException ex) {
+    public ResponseEntity<ProblemDetail> handleCannotGetJdbcConnectionException(CannotGetJdbcConnectionException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Database connection error"));
     }
