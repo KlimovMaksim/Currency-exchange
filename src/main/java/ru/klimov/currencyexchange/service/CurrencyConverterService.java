@@ -30,8 +30,8 @@ public class CurrencyConverterService {
         validateRequestParam(from, to, amount);
         Currency fromCurrency = currencyService.getCurrency(from);
         Currency toCurrency = currencyService.getCurrency(to);
-        BigDecimal amountBD = new BigDecimal(amount);
-        BigDecimal fromToRate = resolveFromToRate(from, to);
+        BigDecimal amountBD = BigDecimal.valueOf(amount);
+        BigDecimal fromToRate = findExchangeRate(from, to);
         BigDecimal convertedAmount = fromToRate.multiply(amountBD);
         return new ExchangeResponse(
                 fromCurrency,
@@ -42,7 +42,7 @@ public class CurrencyConverterService {
         );
     }
 
-    private BigDecimal resolveFromToRate(String from, String to) {
+    private BigDecimal findExchangeRate(String from, String to) {
         try {
             BigDecimal directExchangeRate = exchangeRateService.getExchangeRateByCodePair(from, to).getRate();
             return directExchangeRate;
@@ -52,11 +52,15 @@ public class CurrencyConverterService {
             return BigDecimal.ONE.divide(reverseExchangeRate, 6, RoundingMode.HALF_UP);
         } catch (ExchangeRateNotFoundException ignored) {}
         try {
-            BigDecimal fromUsdRate = resolveFromToRate("USD", from);
-            BigDecimal toUsdRate = resolveFromToRate("USD", to);
-            return toUsdRate.divide(fromUsdRate, 6, RoundingMode.HALF_UP);
+            return getRateThroughUsd(from, to);
         } catch (ExchangeRateNotFoundException ex) {
             throw new ExchangeRateNotFoundException("Exchange rate with " + from + "->" + to + " not found");
         }
+    }
+
+    private BigDecimal getRateThroughUsd(String from, String to) {
+        BigDecimal fromUsdRate = exchangeRateService.getExchangeRateByCodePair("USD", from).getRate();
+        BigDecimal toUsdRate = exchangeRateService.getExchangeRateByCodePair("USD", to).getRate();
+        return toUsdRate.divide(fromUsdRate, 6, RoundingMode.HALF_UP);
     }
 }
