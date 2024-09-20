@@ -29,7 +29,7 @@ public class CurrencyService {
     }
 
     public Currency getCurrency(String currencyCode) {
-        if (currencyCode.isBlank()) throw new IllegalArgumentException("Currency code must not be empty");
+        if (currencyCode.isBlank()) throw new InvalidCurrencyDataException("Currency code must not be empty");
         return currencyRepository.findByCurrencyCode(currencyCode)
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency with code " + currencyCode + " not found"));
     }
