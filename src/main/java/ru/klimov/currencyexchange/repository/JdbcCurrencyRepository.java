@@ -66,6 +66,16 @@ public class JdbcCurrencyRepository implements CurrencyRepository {
             ps.setString(3, entity.getSign());
             return ps;
         }, keyHolder);
+
+        if (keyHolder.getKeys().get("id") != null) {
+            Object generatedId = keyHolder.getKeys().get("id");
+            if (generatedId instanceof Number) {
+                entity.setCurrencyId(((Number) generatedId).longValue());
+            } else {
+                throw new IllegalStateException("Generated ID is not a valid number");
+            }
+        }
+
         return entity;
     }
 
