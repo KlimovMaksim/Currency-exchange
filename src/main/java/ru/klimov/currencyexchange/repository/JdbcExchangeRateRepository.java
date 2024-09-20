@@ -2,10 +2,13 @@ package ru.klimov.currencyexchange.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.entity.ExchangeRate;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -94,16 +97,33 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
 
     @Override
     public ExchangeRate save(ExchangeRate entity) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = """
                 insert into exchangerates (basecurrencyid, targetcurrencyid, rate)
                 values
                 (
                  (select id from currencies where code = ?),
                  (select id from currencies where code = ?),
-                 1.96
+                 ?
                 )
                 """;
-        jdbcTemplate.update(sql, entity.getBaseCurrency().getCode(), entity.getTargetCurrency().getCode());
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setString(1, entity.getBaseCurrency().getCode());
+            ps.setString(2, entity.getTargetCurrency().getCode());
+            ps.setBigDecimal(3, entity.getRate());
+            return ps;
+        }, keyHolder);
+
+        if (keyHolder.getKeys().get("id") != null) {
+            Object generatedId = keyHolder.getKeys().get("id");
+            if (generatedId instanceof Number) {
+                entity.setExchangeRateId(((Number) generatedId).longValue());
+            } else {
+                throw new IllegalStateException("Generated ID is not a valid number");
+            }
+        }
+
         return entity;
     }
 
