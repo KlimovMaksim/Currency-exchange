@@ -8,6 +8,7 @@ import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.entity.ExchangeRate;
 import ru.klimov.currencyexchange.exceptions.ExchangeRateAlreadyExistsException;
 import ru.klimov.currencyexchange.exceptions.ExchangeRateNotFoundException;
+import ru.klimov.currencyexchange.exceptions.InvalidExchangeRateDataException;
 import ru.klimov.currencyexchange.repository.ExchangeRateRepository;
 
 import java.math.BigDecimal;
@@ -30,7 +31,7 @@ public class ExchangeRateService {
     }
 
     public ExchangeRate getExchangeRateByCodePair(String codePair) {
-        if (codePair.isBlank()) throw new IllegalArgumentException("Exchange rate code pair must not be empty");
+        if (codePair.isBlank()) throw new InvalidExchangeRateDataException("Exchange rate code pair must not be empty");
         return findExchangeRate(codePair.substring(0, 3), codePair.substring(3));
     }
 
@@ -41,7 +42,7 @@ public class ExchangeRateService {
 
     public ExchangeRate getExchangeRateByCodePair(String from, String to) {
         if (from.isBlank() || to.isBlank())
-            throw new IllegalArgumentException("Exchange rate code pair must not be empty");
+            throw new InvalidExchangeRateDataException("Exchange rate code pair must not be empty");
         return findExchangeRate(from, to);
     }
 
@@ -58,11 +59,11 @@ public class ExchangeRateService {
 
     private void validateExchangeRate(Map<String, String> exchangeRateParamMap) {
         if (!exchangeRateParamMap.containsKey("baseCurrencyCode") || exchangeRateParamMap.get("baseCurrencyCode").isBlank())
-            throw new IllegalArgumentException("baseCurrencyCode is required and cannot be empty");
+            throw new InvalidExchangeRateDataException("baseCurrencyCode is required and cannot be empty");
         if (!exchangeRateParamMap.containsKey("targetCurrencyCode") || exchangeRateParamMap.get("targetCurrencyCode").isBlank())
-            throw new IllegalArgumentException("targetCurrencyCode is required and cannot be empty");
+            throw new InvalidExchangeRateDataException("targetCurrencyCode is required and cannot be empty");
         if (!exchangeRateParamMap.containsKey("rate") || exchangeRateParamMap.get("rate").isBlank())
-            throw new IllegalArgumentException("rate is required and cannot be empty");
+            throw new InvalidExchangeRateDataException("rate is required and cannot be empty");
     }
 
     private ExchangeRate mapToExchangeRate(Map<String, String> multiValueMap) {
@@ -84,6 +85,6 @@ public class ExchangeRateService {
 
     private void validateRate(Map<String, String> rateParamMap) {
         if (!rateParamMap.containsKey("rate") || rateParamMap.get("rate").isBlank())
-            throw new IllegalArgumentException("rate is required and cannot be empty");
+            throw new InvalidExchangeRateDataException("rate is required and cannot be empty");
     }
 }
