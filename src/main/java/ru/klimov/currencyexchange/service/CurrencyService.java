@@ -42,7 +42,7 @@ public class CurrencyService {
             return currencyRepository.save(currency);
         } catch (DuplicateKeyException e) {
             throw new CurrencyAlreadyExistException("Currency with code " +
-                    currencyParamMap.get("currencyCode") + " already exists");
+                    currencyParamMap.get("code") + " already exists");
         }
     }
 
