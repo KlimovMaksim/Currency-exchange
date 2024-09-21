@@ -73,26 +73,14 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
     }
 
     @Override
-    public Optional<ExchangeRate> findById(Long id) {
+    public void update(ExchangeRate entity) {
+        // todo
         String sql = """
-                select
-                    e.id,
-                    bc.id,
-                    bc.fullname,
-                    bc.code,
-                    bc.sign,
-                    tc.id,
-                    tc.fullname,
-                    tc.code,
-                    tc.sign,
-                    e.rate
-                    from exchangerates e
-                join currencies bc on e.basecurrencyid = bc.id
-                join currencies tc on e.targetcurrencyid = tc.id
-                where e.id = ?
+                update exchangerates
+                set rate = ?
+                where id = ?
                 """;
-        List<ExchangeRate> list = jdbcTemplate.query(sql, this::mapRowToExchangeRate, id);
-        return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+        jdbcTemplate.update(sql, entity.getRate(), entity.getExchangeRateId());
     }
 
     @Override
@@ -125,21 +113,5 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
         }
 
         return entity;
-    }
-
-    @Override
-    public void delete(Long id) {
-        // todo
-    }
-
-    @Override
-    public void update(ExchangeRate entity) {
-        // todo
-        String sql = """
-                update exchangerates
-                set rate = ?
-                where id = ?
-                """;
-        jdbcTemplate.update(sql, entity.getRate(), entity.getExchangeRateId());
     }
 }

@@ -46,14 +46,6 @@ public class JdbcCurrencyRepository implements CurrencyRepository {
     }
 
     @Override
-    public Optional<Currency> findById(Long id) {
-        List<Currency> result = jdbcTemplate.query("select id, code, fullname, sign from Currencies where code=?",
-                this::mapRowToCurrency,
-                id);
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
-    }
-
-    @Override
     public Currency save(Currency entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
@@ -77,19 +69,5 @@ public class JdbcCurrencyRepository implements CurrencyRepository {
         }
 
         return entity;
-    }
-
-    @Override
-    public void delete(Long id) {
-        jdbcTemplate.update("delete from Currencies where id=?", id);
-    }
-
-    @Override
-    public void update(Currency entity) {
-        jdbcTemplate.update("update Currencies set code=?, fullname=?, sign=? where id=?",
-                entity.getCode(),
-                entity.getFullName(),
-                entity.getSign(),
-                entity.getCurrencyId());
     }
 }
