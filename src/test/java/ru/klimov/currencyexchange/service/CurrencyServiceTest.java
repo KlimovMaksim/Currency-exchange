@@ -33,17 +33,17 @@ class CurrencyServiceTest {
     @Test
     void findAllCurrencies_ReturnsAllCurrencies() {
         // given
-        List<Currency> currencies = List.of(new Currency(3L, "RUB", "Ruble", "₽"),
+        List<Currency> excpected = List.of(new Currency(3L, "RUB", "Ruble", "₽"),
                 new Currency(4L, "USD", "United States Dollar", "$"),
                 new Currency(5L, "GBP", "British Pound", "£"));
-        doReturn(currencies).when(this.currencyRepository).findAll();
+        doReturn(excpected).when(this.currencyRepository).findAll();
 
         // when
-        var result = this.currencyService.findAllCurrencies();
+        var actual = this.currencyService.findAllCurrencies();
 
         // then
-        assertNotNull(result);
-        assertEquals(currencies, result);
+        assertNotNull(actual);
+        assertEquals(excpected, actual);
     }
 
     @Test
@@ -54,11 +54,11 @@ class CurrencyServiceTest {
         doReturn(Optional.of(expectedCurrency)).when(this.currencyRepository).findByCurrencyCode(currencyCode);
 
         // when
-        var result = this.currencyService.getCurrency(currencyCode);
+        var actual = this.currencyService.getCurrency(currencyCode);
 
         // then
-        assertNotNull(result);
-        assertEquals(expectedCurrency, result);
+        assertNotNull(actual);
+        assertEquals(expectedCurrency, actual);
         verify(this.currencyRepository, times(1)).findByCurrencyCode(currencyCode);
         verifyNoMoreInteractions(this.currencyRepository);
     }
@@ -70,9 +70,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.getCurrency(currencyCode));
-        assertEquals(exception.getMessage(), "Currency code is required and cannot be empty");
+        assertEquals("Currency code is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).findByCurrencyCode(any());
     }
 
@@ -83,9 +83,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.getCurrency(currencyCode));
-        assertEquals(exception.getMessage(), "Currency code is required and cannot be empty");
+        assertEquals("Currency code is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).findByCurrencyCode(any());
     }
 
@@ -101,14 +101,14 @@ class CurrencyServiceTest {
         doReturn(expectedCurrency).when(this.currencyRepository).save(expectedCurrency);
 
         // when
-        var result = this.currencyService.createCurrency(currencyParamMap);
+        var actual = this.currencyService.createCurrency(currencyParamMap);
 
         // then
-        assertNotNull(result);
-        assertNotNull(result.getCurrencyId());
-        assertEquals(expectedCurrency.getCode(), result.getCode());
-        assertEquals(expectedCurrency.getFullName(), result.getFullName());
-        assertEquals(expectedCurrency.getSign(), result.getSign());
+        assertNotNull(actual);
+        assertNotNull(actual.getCurrencyId());
+        assertEquals(expectedCurrency.getCode(), actual.getCode());
+        assertEquals(expectedCurrency.getFullName(), actual.getFullName());
+        assertEquals(expectedCurrency.getSign(), actual.getSign());
         verify(this.modelMapper, times(1)).map(currencyParamMap, Currency.class);
         verify(this.currencyRepository, times(1)).save(expectedCurrency);
         verifyNoMoreInteractions(this.currencyRepository);
@@ -124,9 +124,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency code is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency code is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -140,9 +140,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency fullname is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency fullname is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -156,9 +156,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency sign is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency sign is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -171,9 +171,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency code is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency code is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -186,9 +186,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency fullname is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency fullname is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -201,9 +201,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency sign is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency sign is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -217,9 +217,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency code is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency code is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -233,9 +233,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency fullname is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency fullname is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -249,9 +249,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Currency sign is required and cannot be empty", exception.getMessage());
+        assertEquals("Currency sign is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).save(any());
     }
 
@@ -268,10 +268,10 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(CurrencyAlreadyExistException.class,
+        Exception actualException = assertThrows(CurrencyAlreadyExistException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
         assertEquals("Currency with code " + currencyParamMap.get("code") + " already exists",
-                exception.getMessage());
+                actualException.getMessage());
     }
 
     @Test
@@ -281,9 +281,9 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Parameters code, fullname, sign are required", exception.getMessage());
+        assertEquals("Parameters code, fullname, sign are required", actualException.getMessage());
     }
 
     @Test
@@ -293,8 +293,8 @@ class CurrencyServiceTest {
 
         // when
         // then
-        Exception exception = assertThrows(InvalidCurrencyDataException.class,
+        Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
-        assertEquals("Parameters code, fullname, sign are required", exception.getMessage());
+        assertEquals("Parameters code, fullname, sign are required", actualException.getMessage());
     }
 }
