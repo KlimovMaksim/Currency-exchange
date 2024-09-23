@@ -29,11 +29,20 @@ public class CurrencyService {
     }
 
     public Currency getCurrency(String currencyCode) {
-        if (currencyCode.isBlank()) throw new InvalidCurrencyDataException("Currency code must not be empty");
+        validateCurrencyCode(currencyCode);
         return currencyRepository.findByCurrencyCode(currencyCode)
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency with code " + currencyCode + " not found"));
     }
 
+    private void validateCurrencyCode(String currencyCode) {
+        validateParam("code", currencyCode);
+    }
+
+    private void validateParam(String key, String value) {
+        if (value == null || value.isBlank()) {
+            throw new InvalidCurrencyDataException("Currency " + key +" is required and cannot be empty");
+        }
+    }
 
     public Currency createCurrency(Map<String, String> currencyParamMap) {
         validateCurrencyData(currencyParamMap);
@@ -47,11 +56,10 @@ public class CurrencyService {
     }
 
     private void validateCurrencyData(Map<String, String> currencyParamMap) {
-        if (!currencyParamMap.containsKey("code") || currencyParamMap.get("code").isBlank())
-            throw new InvalidCurrencyDataException("Currency code is required and cannot be empty");
-        if (!currencyParamMap.containsKey("fullname") || currencyParamMap.get("fullname").isBlank())
-            throw new InvalidCurrencyDataException("Currency fullname is required and cannot be empty");
-        if (!currencyParamMap.containsKey("sign") || currencyParamMap.get("sign").isBlank())
-            throw new InvalidCurrencyDataException("Currency sign is required and cannot be empty");
+        if (currencyParamMap == null || currencyParamMap.isEmpty())
+            throw new InvalidCurrencyDataException("Parameters code, fullname, sign are required");
+        validateParam("code", currencyParamMap.get("code"));
+        validateParam("fullname", currencyParamMap.get("fullname"));
+        validateParam("sign", currencyParamMap.get("sign"));
     }
 }
