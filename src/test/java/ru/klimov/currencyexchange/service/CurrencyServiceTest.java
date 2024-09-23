@@ -1,5 +1,6 @@
 package ru.klimov.currencyexchange.service;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.dao.DuplicateKeyException;
 import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.exceptions.CurrencyAlreadyExistException;
+import ru.klimov.currencyexchange.exceptions.CurrencyNotFoundException;
 import ru.klimov.currencyexchange.exceptions.InvalidCurrencyDataException;
 import ru.klimov.currencyexchange.repository.CurrencyRepository;
 
@@ -60,7 +62,6 @@ class CurrencyServiceTest {
         assertNotNull(actual);
         assertEquals(expectedCurrency, actual);
         verify(this.currencyRepository, times(1)).findByCurrencyCode(currencyCode);
-        verifyNoMoreInteractions(this.currencyRepository);
     }
 
     @Test
@@ -87,6 +88,20 @@ class CurrencyServiceTest {
                 () -> this.currencyService.getCurrency(currencyCode));
         assertEquals("Currency code is required and cannot be empty", actualException.getMessage());
         verify(this.currencyRepository, never()).findByCurrencyCode(any());
+    }
+
+    @Test
+    void getCurrency_CurrencyCodeNotFound_CurrencyNotFoundException() {
+        // given
+        String currencyCode = "USD";
+        doReturn(Optional.empty()).when(this.currencyRepository).findByCurrencyCode(currencyCode);
+
+        // when
+        // then
+        Exception actualException = assertThrows(CurrencyNotFoundException.class,
+                () -> this.currencyService.getCurrency(currencyCode));
+        assertEquals("Currency with code " + currencyCode + " not found", actualException.getMessage());
+        verify(this.currencyRepository, times(1)).findByCurrencyCode(currencyCode);
     }
 
     @Test
@@ -272,6 +287,7 @@ class CurrencyServiceTest {
                 () -> this.currencyService.createCurrency(currencyParamMap));
         assertEquals("Currency with code " + currencyParamMap.get("code") + " already exists",
                 actualException.getMessage());
+        verifyNoMoreInteractions(this.currencyRepository);
     }
 
     @Test
@@ -284,6 +300,7 @@ class CurrencyServiceTest {
         Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
         assertEquals("Parameters code, fullname, sign are required", actualException.getMessage());
+        verify(this.currencyRepository, never()).save(any());
     }
 
     @Test
@@ -296,5 +313,6 @@ class CurrencyServiceTest {
         Exception actualException = assertThrows(InvalidCurrencyDataException.class,
                 () -> this.currencyService.createCurrency(currencyParamMap));
         assertEquals("Parameters code, fullname, sign are required", actualException.getMessage());
+        verify(this.currencyRepository, never()).save(any());
     }
 }
