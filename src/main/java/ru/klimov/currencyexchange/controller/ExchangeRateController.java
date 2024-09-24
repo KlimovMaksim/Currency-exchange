@@ -18,19 +18,9 @@ public class ExchangeRateController {
         this.exchangeRateService = exchangeRateService;
     }
 
-    @GetMapping
-    public Iterable<ExchangeRate> getExchangeRates() {
-        return exchangeRateService.findAllExchangeRates();
-    }
-
     @GetMapping("/{codePair}")
     public ExchangeRate getExchangeRate(@PathVariable String codePair) {
         return exchangeRateService.getExchangeRateByCodePair(codePair);
-    }
-
-    @PostMapping(consumes = "application/x-www-form-urlencoded")
-    public ExchangeRate createExchangeRate(@RequestParam Map<String, String> exchangeRateParamMap) {
-        return exchangeRateService.createExchangeRate(exchangeRateParamMap);
     }
 
     @PatchMapping(path = "/{codePair}", consumes = "application/x-www-form-urlencoded")
