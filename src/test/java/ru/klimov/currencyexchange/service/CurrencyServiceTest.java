@@ -1,11 +1,9 @@
 package ru.klimov.currencyexchange.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DuplicateKeyException;
@@ -15,10 +13,14 @@ import ru.klimov.currencyexchange.exceptions.CurrencyNotFoundException;
 import ru.klimov.currencyexchange.exceptions.InvalidCurrencyDataException;
 import ru.klimov.currencyexchange.repository.CurrencyRepository;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CurrencyServiceTest {
@@ -35,17 +37,18 @@ class CurrencyServiceTest {
     @Test
     void findAllCurrencies_ReturnsAllCurrencies() {
         // given
-        List<Currency> excpected = List.of(new Currency(3L, "RUB", "Ruble", "₽"),
+        List<Currency> expected = List.of(new Currency(3L, "RUB", "Ruble", "₽"),
                 new Currency(4L, "USD", "United States Dollar", "$"),
                 new Currency(5L, "GBP", "British Pound", "£"));
-        doReturn(excpected).when(this.currencyRepository).findAll();
+        doReturn(expected).when(this.currencyRepository).findAll();
 
         // when
         var actual = this.currencyService.findAllCurrencies();
 
         // then
         assertNotNull(actual);
-        assertEquals(excpected, actual);
+        assertEquals(expected, actual);
+        verify(this.currencyRepository, times(1)).findAll();
     }
 
     @Test
