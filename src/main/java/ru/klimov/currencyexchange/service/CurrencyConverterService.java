@@ -21,7 +21,7 @@ public class CurrencyConverterService {
         this.currencyService = currencyService;
     }
 
-    private static void validateRequestParam(String from, String to, double amount) {
+    private void validateRequestParam(String from, String to, double amount) {
         if (from.isBlank() || to.isBlank()) throw new IllegalArgumentException("Param from or to are blank");
         if (amount <= 0) throw new IllegalArgumentException("Amount must be greater than 0");
     }

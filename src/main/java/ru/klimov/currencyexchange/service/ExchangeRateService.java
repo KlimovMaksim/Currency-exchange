@@ -31,60 +31,68 @@ public class ExchangeRateService {
     }
 
     public ExchangeRate getExchangeRateByCodePair(String codePair) {
-        if (codePair.isBlank()) throw new InvalidExchangeRateDataException("Exchange rate code pair must not be empty");
+        validateCodePair(codePair);
         return findExchangeRate(codePair.substring(0, 3), codePair.substring(3));
     }
 
-    private ExchangeRate findExchangeRate(String from, String to) {
-        return exchangeRateRepository.findExchangeRateByCodePair(from, to)
-                .orElseThrow(() -> new ExchangeRateNotFoundException("Exchange rate with " + from + "->" + to + " not found"));
+    public ExchangeRate getExchangeRateByCodePair(String base, String target) {
+        validateCodePair(base + target);
+        return findExchangeRate(base, target);
     }
 
-    public ExchangeRate getExchangeRateByCodePair(String from, String to) {
-        if (from.isBlank() || to.isBlank())
-            throw new InvalidExchangeRateDataException("Exchange rate code pair must not be empty");
-        return findExchangeRate(from, to);
+    private ExchangeRate findExchangeRate(String base, String target) {
+        return exchangeRateRepository.findExchangeRateByCodePair(base, target)
+                .orElseThrow(() -> new ExchangeRateNotFoundException("Exchange rate with " + base + "->" + target + " not found"));
     }
 
     public ExchangeRate createExchangeRate(Map<String, String> exchangeRateParamMap) {
-        validateExchangeRate(exchangeRateParamMap);
-        try {
-            return exchangeRateRepository.save(mapToExchangeRate(exchangeRateParamMap));
-        } catch (DuplicateKeyException e) {
-            throw new ExchangeRateAlreadyExistsException("Exchange rate " +
-                    exchangeRateParamMap.get("baseCurrencyCode") + "->" +
-                    exchangeRateParamMap.get("targetCurrencyCode") + " already exists");
-        }
-    }
-
-    private void validateExchangeRate(Map<String, String> exchangeRateParamMap) {
-        if (!exchangeRateParamMap.containsKey("baseCurrencyCode") || exchangeRateParamMap.get("baseCurrencyCode").isBlank())
-            throw new InvalidExchangeRateDataException("baseCurrencyCode is required and cannot be empty");
-        if (!exchangeRateParamMap.containsKey("targetCurrencyCode") || exchangeRateParamMap.get("targetCurrencyCode").isBlank())
-            throw new InvalidExchangeRateDataException("targetCurrencyCode is required and cannot be empty");
-        if (!exchangeRateParamMap.containsKey("rate") || exchangeRateParamMap.get("rate").isBlank())
-            throw new InvalidExchangeRateDataException("rate is required and cannot be empty");
-    }
-
-    private ExchangeRate mapToExchangeRate(Map<String, String> multiValueMap) {
-        Currency baseCurrency = currencyService.getCurrency(multiValueMap.get("baseCurrencyCode"));
-        Currency targetCurrency = currencyService.getCurrency(multiValueMap.get("targetCurrencyCode"));
-        ExchangeRate exchangeRate = new ExchangeRate();
-        exchangeRate.setBaseCurrency(baseCurrency);
-        exchangeRate.setTargetCurrency(targetCurrency);
-        exchangeRate.setRate(new BigDecimal(multiValueMap.get("rate")));
-        return exchangeRate;
+        validateExchangeRateParams(exchangeRateParamMap);
+        return saveExchangeRate(exchangeRateParamMap);
     }
 
     public ExchangeRate updateExchangeRate(String codePair, Map<String, String> rateParamMap) {
-        validateRate(rateParamMap);
+        validateCodePair(codePair);
+        validateRateParam(rateParamMap);
         ExchangeRate exchangeRate = getExchangeRateByCodePair(codePair);
+        exchangeRate.setRate(new BigDecimal(rateParamMap.get("rate")));
         exchangeRateRepository.update(exchangeRate);
         return exchangeRate;
     }
 
-    private void validateRate(Map<String, String> rateParamMap) {
-        if (!rateParamMap.containsKey("rate") || rateParamMap.get("rate").isBlank())
-            throw new InvalidExchangeRateDataException("rate is required and cannot be empty");
+    private void validateCodePair(String codePair) {
+        if (codePair == null || codePair.isBlank()) {
+            throw new InvalidExchangeRateDataException("Currency codes must not be empty");
+        }
+        if (codePair.trim().length() != 6) {
+            throw new InvalidExchangeRateDataException("Currency base and target codes must contain 3 characters each");
+        }
+    }
+
+    private void validateExchangeRateParams(Map<String, String> params) {
+        validateCodePair(params.get("baseCurrencyCode") + params.get("targetCurrencyCode"));
+        validateRateParam(params);
+    }
+
+    private void validateRateParam(Map<String, String> rateParamMap) {
+        String rate = rateParamMap.get("rate");
+        if (rate == null || rate.isBlank()) {
+            throw new InvalidExchangeRateDataException("Rate is required and cannot be empty");
+        }
+    }
+
+    private ExchangeRate saveExchangeRate(Map<String, String> exchangeRateParamMap) {
+        Currency baseCurrency = currencyService.getCurrency(exchangeRateParamMap.get("baseCurrencyCode"));
+        Currency targetCurrency = currencyService.getCurrency(exchangeRateParamMap.get("targetCurrencyCode"));
+
+        ExchangeRate exchangeRate = new ExchangeRate();
+        exchangeRate.setBaseCurrency(baseCurrency);
+        exchangeRate.setTargetCurrency(targetCurrency);
+        exchangeRate.setRate(new BigDecimal(exchangeRateParamMap.get("rate")));
+
+        try {
+            return exchangeRateRepository.save(exchangeRate);
+        } catch (DuplicateKeyException e) {
+            throw new ExchangeRateAlreadyExistsException("Exchange rate " + baseCurrency.getCode() + "->" + targetCurrency.getCode() + " already exists");
+        }
     }
 }
