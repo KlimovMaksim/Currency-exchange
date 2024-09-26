@@ -5,14 +5,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.entity.ExchangeRate;
+import ru.klimov.currencyexchange.exceptions.ExchangeRateAlreadyExistsException;
 import ru.klimov.currencyexchange.exceptions.ExchangeRateNotFoundException;
 import ru.klimov.currencyexchange.exceptions.InvalidExchangeRateDataException;
 import ru.klimov.currencyexchange.repository.ExchangeRateRepository;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -202,5 +206,182 @@ class ExchangeRateServiceTest {
         // then
         assertEquals("Exchange rate with USD->EUR not found", exception.getMessage());
         verify(exchangeRateRepository, times(1)).findExchangeRateByCodePair(base, target);
+    }
+
+    @Test
+    void createExchangeRate_ValidParams_SuccessfulCreation() {
+        // given
+        Map<String, String> exchangeRateParams = new HashMap<>();
+        exchangeRateParams.put("baseCurrencyCode", "USD");
+        exchangeRateParams.put("targetCurrencyCode", "EUR");
+        exchangeRateParams.put("rate", "0.85");
+
+        Currency baseCurrency = new Currency(1L, "USD", "United States Dollar", "$");
+        Currency targetCurrency = new Currency(2L, "EUR", "Euro", "€");
+        ExchangeRate expectedExchangeRate = new ExchangeRate();
+        expectedExchangeRate.setBaseCurrency(baseCurrency);
+        expectedExchangeRate.setTargetCurrency(targetCurrency);
+        expectedExchangeRate.setRate(new BigDecimal("0.85"));
+
+        when(currencyService.getCurrency(exchangeRateParams.get("baseCurrencyCode"))).thenReturn(baseCurrency);
+        when(currencyService.getCurrency(exchangeRateParams.get("targetCurrencyCode"))).thenReturn(targetCurrency);
+        when(exchangeRateRepository.save(expectedExchangeRate)).thenReturn(expectedExchangeRate);
+
+        // when
+        ExchangeRate actualExchangeRate = exchangeRateService.createExchangeRate(exchangeRateParams);
+
+        // then
+        assertNotNull(actualExchangeRate);
+        assertEquals(expectedExchangeRate, actualExchangeRate);
+        verify(exchangeRateRepository, times(1)).save(expectedExchangeRate);
+    }
+
+    // todo check other
+    @Test
+    void createExchangeRate_MissingBaseCurrency_ThrowsInvalidExchangeRateDataException() {
+        // given
+        Map<String, String> exchangeRateParams = new HashMap<>();
+        exchangeRateParams.put("targetCurrencyCode", "EUR");
+        exchangeRateParams.put("rate", "0.85");
+
+        // when
+        Exception exception = assertThrows(InvalidExchangeRateDataException.class,
+                () -> exchangeRateService.createExchangeRate(exchangeRateParams));
+
+        // then
+        assertEquals("Currency codes must not be empty", exception.getMessage());
+        verify(exchangeRateRepository, never()).save(any(ExchangeRate.class));
+    }
+
+    @Test
+    void createExchangeRate_EmptyRateParam_ThrowsInvalidExchangeRateDataException() {
+        // given
+        Map<String, String> exchangeRateParams = new HashMap<>();
+        exchangeRateParams.put("baseCurrencyCode", "USD");
+        exchangeRateParams.put("targetCurrencyCode", "EUR");
+        exchangeRateParams.put("rate", "");
+
+        // when
+        Exception exception = assertThrows(InvalidExchangeRateDataException.class,
+                () -> exchangeRateService.createExchangeRate(exchangeRateParams));
+
+        // then
+        assertEquals("Rate is required and cannot be empty", exception.getMessage());
+        verify(exchangeRateRepository, never()).save(any(ExchangeRate.class));
+    }
+
+    @Test
+    void createExchangeRate_DuplicateExchangeRate_ThrowsExchangeRateAlreadyExistsException() {
+        // given
+        Map<String, String> exchangeRateParams = new HashMap<>();
+        exchangeRateParams.put("baseCurrencyCode", "USD");
+        exchangeRateParams.put("targetCurrencyCode", "EUR");
+        exchangeRateParams.put("rate", "0.85");
+
+        Currency baseCurrency = new Currency(1L, "USD", "United States Dollar", "$");
+        Currency targetCurrency = new Currency(2L, "EUR", "Euro", "€");
+
+        when(currencyService.getCurrency("USD")).thenReturn(baseCurrency);
+        when(currencyService.getCurrency("EUR")).thenReturn(targetCurrency);
+        when(exchangeRateRepository.save(any(ExchangeRate.class)))
+                .thenThrow(new DuplicateKeyException("Duplicate"));
+
+        // when
+        Exception exception = assertThrows(ExchangeRateAlreadyExistsException.class,
+                () -> exchangeRateService.createExchangeRate(exchangeRateParams));
+
+        // then
+        assertEquals("Exchange rate USD->EUR already exists", exception.getMessage());
+        verify(exchangeRateRepository, times(1)).save(any(ExchangeRate.class));
+    }
+
+    @Test
+    void updateExchangeRate_ValidParams_SuccessfulUpdate() {
+        // given
+        String codePair = "USDEUR";
+        Map<String, String> rateParamMap = new HashMap<>();
+        rateParamMap.put("rate", "0.85");
+
+        ExchangeRate existingExchangeRate = new ExchangeRate();
+        existingExchangeRate.setBaseCurrency(new Currency(1L, "USD", "United States Dollar", "$"));
+        existingExchangeRate.setTargetCurrency(new Currency(2L, "EUR", "Euro", "€"));
+        existingExchangeRate.setRate(new BigDecimal("0.80"));
+
+        when(exchangeRateRepository.findExchangeRateByCodePair("USD", "EUR"))
+                .thenReturn(Optional.of(existingExchangeRate));
+
+        // when
+        ExchangeRate updatedExchangeRate = exchangeRateService.updateExchangeRate(codePair, rateParamMap);
+
+        // then
+        assertNotNull(updatedExchangeRate);
+        assertEquals(new BigDecimal("0.85"), updatedExchangeRate.getRate());
+        verify(exchangeRateRepository, times(1)).update(existingExchangeRate);
+    }
+
+    @Test
+    void updateExchangeRate_InvalidCodePair_ThrowsInvalidExchangeRateDataException() {
+        // given
+        String invalidCodePair = "US";
+        Map<String, String> rateParamMap = new HashMap<>();
+        rateParamMap.put("rate", "0.85");
+
+        // when
+        Exception exception = assertThrows(InvalidExchangeRateDataException.class,
+                () -> exchangeRateService.updateExchangeRate(invalidCodePair, rateParamMap));
+
+        // then
+        assertEquals("Currency base and target codes must contain 3 characters each", exception.getMessage());
+        verify(exchangeRateRepository, never()).update(any(ExchangeRate.class));
+    }
+
+    @Test
+    void updateExchangeRate_MissingRateParam_ThrowsInvalidExchangeRateDataException() {
+        // given
+        String codePair = "USDEUR";
+        Map<String, String> rateParamMap = new HashMap<>();
+
+        // when
+        Exception exception = assertThrows(InvalidExchangeRateDataException.class,
+                () -> exchangeRateService.updateExchangeRate(codePair, rateParamMap));
+
+        // then
+        assertEquals("Rate is required and cannot be empty", exception.getMessage());
+        verify(exchangeRateRepository, never()).update(any(ExchangeRate.class));
+    }
+
+    @Test
+    void updateExchangeRate_ExchangeRateNotFound_ThrowsExchangeRateNotFoundException() {
+        // given
+        String codePair = "USDEUR";
+        Map<String, String> rateParamMap = new HashMap<>();
+        rateParamMap.put("rate", "0.85");
+
+        when(exchangeRateRepository.findExchangeRateByCodePair("USD", "EUR"))
+                .thenReturn(Optional.empty());
+
+        // when
+        Exception exception = assertThrows(ExchangeRateNotFoundException.class,
+                () -> exchangeRateService.updateExchangeRate(codePair, rateParamMap));
+
+        // then
+        assertEquals("Exchange rate with USD->EUR not found", exception.getMessage());
+        verify(exchangeRateRepository, never()).update(any(ExchangeRate.class));
+    }
+
+    @Test
+    void updateExchangeRate_NullCodePair_ThrowsInvalidExchangeRateDataException() {
+        // given
+        String codePair = null;
+        Map<String, String> rateParamMap = new HashMap<>();
+        rateParamMap.put("rate", "0.85");
+
+        // when
+        Exception exception = assertThrows(InvalidExchangeRateDataException.class,
+                () -> exchangeRateService.updateExchangeRate(codePair, rateParamMap));
+
+        // then
+        assertEquals("Currency codes must not be empty", exception.getMessage());
+        verify(exchangeRateRepository, never()).update(any(ExchangeRate.class));
     }
 }
