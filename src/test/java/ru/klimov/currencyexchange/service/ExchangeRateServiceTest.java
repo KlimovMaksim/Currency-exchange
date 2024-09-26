@@ -51,5 +51,8 @@ class ExchangeRateServiceTest {
         verify(this.exchangeRateRepository, times(1)).findAll();
     }
 
+    @Test
+    void getExchangeRateByCodePair_CodePairIsValid_ReturnsExchangeRate(){
 
+    }
 }
