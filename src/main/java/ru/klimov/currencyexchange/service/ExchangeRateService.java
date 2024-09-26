@@ -36,8 +36,7 @@ public class ExchangeRateService {
     }
 
     public ExchangeRate getExchangeRateByCodePair(String base, String target) {
-        validateCodePair(base + target);
-        return findExchangeRate(base, target);
+        return getExchangeRateByCodePair(base + target);
     }
 
     private ExchangeRate findExchangeRate(String base, String target) {
