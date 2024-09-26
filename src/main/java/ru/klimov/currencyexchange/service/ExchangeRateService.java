@@ -59,7 +59,7 @@ public class ExchangeRateService {
     }
 
     private void validateCodePair(String codePair) {
-        if (codePair == null || codePair.isBlank()) {
+        if (codePair == null || codePair.isBlank() || codePair.contains("null") || codePair.length() == 3) {
             throw new InvalidExchangeRateDataException("Currency codes must not be empty");
         }
         if (codePair.trim().length() != 6) {
