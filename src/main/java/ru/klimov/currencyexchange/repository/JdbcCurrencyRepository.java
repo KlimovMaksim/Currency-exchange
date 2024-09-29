@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.klimov.currencyexchange.entity.Currency;
 
 import java.sql.PreparedStatement;
@@ -46,6 +47,7 @@ public class JdbcCurrencyRepository implements CurrencyRepository {
     }
 
     @Override
+    @Transactional
     public Currency save(Currency entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {

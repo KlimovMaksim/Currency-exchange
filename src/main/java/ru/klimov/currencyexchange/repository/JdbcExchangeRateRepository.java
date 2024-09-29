@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.entity.ExchangeRate;
 
@@ -73,6 +74,7 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
     }
 
     @Override
+    @Transactional
     public void update(ExchangeRate entity) {
         // todo
         String sql = """
@@ -84,6 +86,7 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
     }
 
     @Override
+    @Transactional
     public ExchangeRate save(ExchangeRate entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = """
