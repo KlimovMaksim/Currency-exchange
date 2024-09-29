@@ -11,7 +11,7 @@ services:
     ports:
       - $POSTGRESQL_LOCAL_PORT:$POSTGRESQL_DOCKER_PORT
     volumes:
-      - ./scripts/.:/docker-entrypoint-initdb.d/.
+#      - ./scripts/.:/docker-entrypoint-initdb.d/.
       - db-data:/var/lib/postgresql/data
 
 volumes:
