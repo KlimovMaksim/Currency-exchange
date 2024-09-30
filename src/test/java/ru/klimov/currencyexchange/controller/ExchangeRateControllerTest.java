@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.entity.ExchangeRate;
 import ru.klimov.currencyexchange.service.ExchangeRateService;
@@ -43,7 +44,8 @@ class ExchangeRateControllerTest {
 
         // then
         assertNotNull(actualExchangeRate);
-        assertEquals(expectedExchangeRate, actualExchangeRate);
+        assertEquals(HttpStatus.OK, actualExchangeRate.getStatusCode());
+        assertEquals(expectedExchangeRate, actualExchangeRate.getBody());
         verify(this.exchangeRateService).getExchangeRateByCodePair(codePair);
     }
 
@@ -64,7 +66,8 @@ class ExchangeRateControllerTest {
 
         // then
         assertNotNull(actualExchangeRate);
-        assertEquals(expectedExchangeRate, actualExchangeRate);
+        assertEquals(HttpStatus.OK, actualExchangeRate.getStatusCode());
+        assertEquals(expectedExchangeRate, actualExchangeRate.getBody());
         verify(this.exchangeRateService).updateExchangeRate(codePair, rateParamMap);
     }
 }

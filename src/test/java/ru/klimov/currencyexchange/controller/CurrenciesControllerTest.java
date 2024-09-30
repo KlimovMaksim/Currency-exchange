@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.service.CurrencyService;
 
@@ -39,7 +40,8 @@ class CurrenciesControllerTest {
 
         // then
         assertNotNull(actualCurrencies);
-        assertEquals(expectedCurrencies, actualCurrencies);
+        assertEquals(HttpStatus.OK, actualCurrencies.getStatusCode());
+        assertEquals(expectedCurrencies, actualCurrencies.getBody());
         verify(this.currencyService).findAllCurrencies();
     }
 
@@ -58,7 +60,8 @@ class CurrenciesControllerTest {
 
         //then
         assertNotNull(actualCurrency);
-        assertEquals(expectedCurrency, actualCurrency);
+        assertEquals(HttpStatus.CREATED, actualCurrency.getStatusCode());
+        assertEquals(expectedCurrency, actualCurrency.getBody());
         verify(this.currencyService).createCurrency(currencyParamMap);
     }
 }
