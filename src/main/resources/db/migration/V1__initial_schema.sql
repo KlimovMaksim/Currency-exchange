@@ -15,10 +15,7 @@ create table currency_exchange_db.ExchangeRates (
      unique(BaseCurrencyId, TargetCurrencyId)
 );
 
-/*alter table currency_exchange_db.ExchangeRates add foreign key (BaseCurrencyId) references Currencies(ID);
-alter table currency_exchange_db.ExchangeRates add foreign key (TargetCurrencyId) references Currencies(ID);*/
-
-insert into currency_exchange_db.Currencies (code, fullname, sign) values
+/*insert into currency_exchange_db.Currencies (code, fullname, sign) values
       ('USD', 'United States Dollar', '$'),
       ('EUR', 'Euro', '€'),
       ('GBP', 'British Pound', '£'),
@@ -32,4 +29,4 @@ insert into currency_exchange_db.ExchangeRates (BaseCurrencyId, TargetCurrencyId
        (2, 1, 1.18),  -- EUR -> USD
        (3, 1, 1.33),  -- GBP -> USD
        (4, 1, 0.0091), -- JPY -> USD
-       (5, 1, 0.73);  -- AUD -> USD
+       (5, 1, 0.73);  -- AUD -> USD*/
