@@ -21,8 +21,8 @@ public class CurrencyController {
         this.currencyService = currencyService;
     }
 
-    @GetMapping("/{currencyCode}")
-    public ResponseEntity<Currency> getCurrency(@PathVariable String currencyCode) {
+    @GetMapping({"/{currencyCode}", "/"})
+    public ResponseEntity<Currency> getCurrency(@PathVariable(required = false) String currencyCode) {
         return new ResponseEntity<>(currencyService.getCurrency(currencyCode), HttpStatus.OK);
     }
 }

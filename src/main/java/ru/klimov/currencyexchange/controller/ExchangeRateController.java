@@ -10,7 +10,7 @@ import ru.klimov.currencyexchange.service.ExchangeRateService;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "/exchangeRates", produces = "application/json")
+@RequestMapping(path = "/exchangeRate", produces = "application/json")
 public class ExchangeRateController {
 
     private final ExchangeRateService exchangeRateService;
@@ -20,8 +20,8 @@ public class ExchangeRateController {
         this.exchangeRateService = exchangeRateService;
     }
 
-    @GetMapping("/{codePair}")
-    public ResponseEntity<ExchangeRate> getExchangeRate(@PathVariable String codePair) {
+    @GetMapping({"/{codePair}", "/"})
+    public ResponseEntity<ExchangeRate> getExchangeRate(@PathVariable(required = false) String codePair) {
         return new ResponseEntity<>(exchangeRateService.getExchangeRateByCodePair(codePair), HttpStatus.OK);
     }
 

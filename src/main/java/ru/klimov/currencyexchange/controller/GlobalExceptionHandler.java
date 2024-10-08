@@ -49,9 +49,4 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ProblemDetail> handleCannotGetJdbcConnectionException(CannotGetJdbcConnectionException ex) {
         return createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Database connection error");
     }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ProblemDetail> handleGenericException(Exception ex) {
-        return createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-    }
 }
