@@ -31,12 +31,12 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
                 select
                     e.id,
                     bc.id,
-                    bc.fullname,
                     bc.code,
+                    bc.fullname,
                     bc.sign,
                     tc.id,
-                    tc.fullname,
                     tc.code,
+                    tc.fullname,
                     tc.sign,
                     e.rate
                 from currency_exchange_db.exchangerates e
@@ -70,7 +70,11 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
     }
 
     private ExchangeRate mapRowToExchangeRate(ResultSet resultSet, int i) throws SQLException {
-        return new ExchangeRate((long) resultSet.getInt(1), new Currency((long) resultSet.getInt(2), resultSet.getString(3), resultSet.getString(4), resultSet.getString(5)), new Currency((long) resultSet.getInt(6), resultSet.getString(7), resultSet.getString(8), resultSet.getString(9)), resultSet.getBigDecimal(10));
+        return new ExchangeRate(
+                (long) resultSet.getInt(1),
+                new Currency((long) resultSet.getInt(2), resultSet.getString(3), resultSet.getString(4), resultSet.getString(5)),
+                new Currency((long) resultSet.getInt(6), resultSet.getString(7), resultSet.getString(8), resultSet.getString(9)),
+                resultSet.getBigDecimal(10));
     }
 
     @Override
