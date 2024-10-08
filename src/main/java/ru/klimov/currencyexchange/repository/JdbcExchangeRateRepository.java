@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.entity.ExchangeRate;
 
@@ -30,17 +31,17 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
                 select
                     e.id,
                     bc.id,
-                    bc.fullname,
                     bc.code,
+                    bc.fullname,
                     bc.sign,
                     tc.id,
-                    tc.fullname,
                     tc.code,
+                    tc.fullname,
                     tc.sign,
                     e.rate
-                from exchangerates e
-                join currencies bc on e.basecurrencyid = bc.id
-                join currencies tc on e.targetcurrencyid = tc.id
+                from currency_exchange_db.exchangerates e
+                join currency_exchange_db.currencies bc on e.basecurrencyid = bc.id
+                join currency_exchange_db.currencies tc on e.targetcurrencyid = tc.id
                 where bc.code = ? and tc.code = ?
                 """;
         List<ExchangeRate> result = jdbcTemplate.query(sql, this::mapRowToExchangeRate, base, target);
@@ -61,22 +62,27 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
                     tc.fullname,
                     tc.sign,
                     e.rate
-                    from exchangerates e
-                join currencies bc on e.basecurrencyid = bc.id
-                join currencies tc on e.targetcurrencyid = tc.id
+                    from currency_exchange_db.exchangerates e
+                join currency_exchange_db.currencies bc on e.basecurrencyid = bc.id
+                join currency_exchange_db.currencies tc on e.targetcurrencyid = tc.id
                 """;
         return jdbcTemplate.query(sql, this::mapRowToExchangeRate);
     }
 
     private ExchangeRate mapRowToExchangeRate(ResultSet resultSet, int i) throws SQLException {
-        return new ExchangeRate((long) resultSet.getInt(1), new Currency((long) resultSet.getInt(2), resultSet.getString(3), resultSet.getString(4), resultSet.getString(5)), new Currency((long) resultSet.getInt(6), resultSet.getString(7), resultSet.getString(8), resultSet.getString(9)), resultSet.getBigDecimal(10));
+        return new ExchangeRate(
+                (long) resultSet.getInt(1),
+                new Currency((long) resultSet.getInt(2), resultSet.getString(3), resultSet.getString(4), resultSet.getString(5)),
+                new Currency((long) resultSet.getInt(6), resultSet.getString(7), resultSet.getString(8), resultSet.getString(9)),
+                resultSet.getBigDecimal(10));
     }
 
     @Override
+    @Transactional
     public void update(ExchangeRate entity) {
         // todo
         String sql = """
-                update exchangerates
+                update currency_exchange_db.exchangerates
                 set rate = ?
                 where id = ?
                 """;
@@ -84,14 +90,15 @@ public class JdbcExchangeRateRepository implements ExchangeRateRepository {
     }
 
     @Override
+    @Transactional
     public ExchangeRate save(ExchangeRate entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = """
-                insert into exchangerates (basecurrencyid, targetcurrencyid, rate)
+                insert into currency_exchange_db.exchangerates (basecurrencyid, targetcurrencyid, rate)
                 values
                 (
-                 (select id from currencies where code = ?),
-                 (select id from currencies where code = ?),
+                 (select id from currency_exchange_db.currencies where code = ?),
+                 (select id from currency_exchange_db.currencies where code = ?),
                  ?
                 )
                 """;

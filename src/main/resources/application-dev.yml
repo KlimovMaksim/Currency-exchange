@@ -2,11 +2,19 @@ spring:
   application:
     name: CurrencyExchange
 
+  flyway:
+    schemas:
+      - currency_exchange_db
+
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/currency-exchange-db
+    url: jdbc:postgresql://localhost:5432/currency_exchange_db
     username: java
     password: java
 
   jpa:
     show-sql: true
+
+logging:
+  level:
+    sql: info

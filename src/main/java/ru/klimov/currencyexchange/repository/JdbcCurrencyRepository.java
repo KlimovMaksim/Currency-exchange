@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.klimov.currencyexchange.entity.Currency;
 
 import java.sql.PreparedStatement;
@@ -25,7 +26,8 @@ public class JdbcCurrencyRepository implements CurrencyRepository {
 
     @Override
     public Optional<Currency> findByCurrencyCode(String currencyCode) {
-        List<Currency> result = jdbcTemplate.query("select id, code, fullname, sign from Currencies where code=?",
+        List<Currency> result = jdbcTemplate.query(
+                "select id, code, fullname, sign from currency_exchange_db.currencies where code=?",
                 this::mapRowToCurrency,
                 currencyCode);
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
@@ -41,16 +43,17 @@ public class JdbcCurrencyRepository implements CurrencyRepository {
 
     @Override
     public Iterable<Currency> findAll() {
-        return jdbcTemplate.query("select id, code, fullname, sign from Currencies",
+        return jdbcTemplate.query("select id, code, fullname, sign from currency_exchange_db.currencies",
                 this::mapRowToCurrency);
     }
 
     @Override
+    @Transactional
     public Currency save(Currency entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(
-                    "insert into Currencies (code, fullname, sign) VALUES (?, ?, ?)",
+                    "insert into currency_exchange_db.currencies (code, fullname, sign) VALUES (?, ?, ?)",
                     PreparedStatement.RETURN_GENERATED_KEYS
             );
             ps.setString(1, entity.getCode());

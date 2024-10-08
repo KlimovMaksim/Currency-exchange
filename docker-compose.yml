@@ -9,7 +9,6 @@ services:
     env_file: ./.env
     ports:
       - $APP_LOCAL_PORT:$APP_DOCKER_PORT
-    restart: always
     depends_on:
       - db
     environment:
@@ -29,7 +28,6 @@ services:
     ports:
       - $POSTGRESQL_LOCAL_PORT:$POSTGRESQL_DOCKER_PORT
     volumes:
-      - ./scripts/.:/docker-entrypoint-initdb.d/.
       - db-data:/var/lib/postgresql/data
 
 volumes:

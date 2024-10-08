@@ -1,6 +1,8 @@
 package ru.klimov.currencyexchange.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +21,8 @@ public class CurrencyController {
         this.currencyService = currencyService;
     }
 
-    @GetMapping("/{currencyCode}")
-    public Currency getCurrency(@PathVariable String currencyCode) {
-        return currencyService.getCurrency(currencyCode);
+    @GetMapping({"/{currencyCode}", "/"})
+    public ResponseEntity<Currency> getCurrency(@PathVariable(required = false) String currencyCode) {
+        return new ResponseEntity<>(currencyService.getCurrency(currencyCode), HttpStatus.OK);
     }
 }
