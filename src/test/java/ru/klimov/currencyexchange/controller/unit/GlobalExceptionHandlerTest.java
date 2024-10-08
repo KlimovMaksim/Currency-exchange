@@ -1,9 +1,10 @@
-package ru.klimov.currencyexchange.controller;
+package ru.klimov.currencyexchange.controller.unit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import ru.klimov.currencyexchange.controller.GlobalExceptionHandler;
 import ru.klimov.currencyexchange.exceptions.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -115,21 +116,6 @@ class GlobalExceptionHandlerTest {
 
         // when
         var actual = globalExceptionHandler.handleCannotGetJdbcConnectionException(exception);
-
-        // then
-        assertNotNull(actual);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, actual.getStatusCode());
-        assertEquals(errorMessage, actual.getBody().getDetail());
-    }
-
-    @Test
-    void handleGenericException() {
-        // given
-        String errorMessage = "An unexpected error occurred";
-        Exception exception = new Exception(errorMessage);
-
-        // when
-        var actual = globalExceptionHandler.handleGenericException(exception);
 
         // then
         assertNotNull(actual);

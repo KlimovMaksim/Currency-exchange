@@ -1,12 +1,12 @@
-package ru.klimov.currencyexchange.controller;
+package ru.klimov.currencyexchange.controller.unit;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import ru.klimov.currencyexchange.controller.ExchangeRatesController;
 import ru.klimov.currencyexchange.entity.Currency;
 import ru.klimov.currencyexchange.entity.ExchangeRate;
 import ru.klimov.currencyexchange.service.ExchangeRateService;
