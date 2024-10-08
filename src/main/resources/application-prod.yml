@@ -4,7 +4,6 @@ spring:
 
   flyway:
     schemas:
-      - public
       - currency_exchange_db
 
   datasource:
